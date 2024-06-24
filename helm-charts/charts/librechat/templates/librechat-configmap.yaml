@@ -1,0 +1,39 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: librechat-config
+  namespace : default 
+data:
+  RAG_PORT: "8000"
+  RAG_API_URL: "http://rag_api:8000"
+  .env: |
+    HOST=localhost
+    PORT=3080
+    MONGO_URI=mongodb://mongodb:27017/LibreChat
+    DOMAIN_CLIENT=http://localhost:3080
+    DOMAIN_SERVER=http://localhost:3080
+    NO_INDEX=true
+    CONSOLE_JSON=false
+    DEBUG_LOGGING=true
+    DEBUG_CONSOLE=false
+    UID=1000
+    GID=1000
+    SEARCH=true
+    MEILI_NO_ANALYTICS=true
+    MEILI_HOST=http://0.0.0.0:7700
+    MEILI_MASTER_KEY=DrhYf7zENyR6AlUCKmnz0eYASOQdl6zxH7s7MKFSfFCt
+    DEBUG_PLUGINS=true
+    CREDS_KEY=f34be427ebb29de8d88c107a71546019685ed8b241d8f2ed00c3df97ad2566f0
+    CREDS_IV=e2341419ec3dd3d19b13a1a87fafcbfb
+    SD_WEBUI_URL=http://host.docker.internal:7860
+    JWT_SECRET=16f8c0ef4a5d391b26034086c628469d3f9f497f08163ab9b40137092f2909ef
+    JWT_REFRESH_SECRET=eaa5191f2914e30b9387fd84e254e4ba6fc51b4654968a82012b72d112ac9ef9
+    INFLUXDB_ADMIN_USER=admin
+    INFLUXDB_ADMIN_PASSWORD=SomePassword
+    INFLUXDB_ORG=LibreChat
+    INFLUXDB_BUCKET=LibreChat
+    INFLUXDB_URL=http://influxdb:8086
+    INFLUXDB_TOKEN=iOU06HKF1ohtYShOiIGkLQOgPUn8zQCF9JqCoXNU-NaZ-AYCId_yDDvIomDPxFsaV4ePMZx4cM9kDSjLS0uQRQ==
+    VITE_API_URL=http://localhost:3080
+    RAG_PORT=8000
+    RAG_API_URL=http://localhost:8000

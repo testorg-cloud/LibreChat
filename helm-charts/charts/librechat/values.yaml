@@ -1,0 +1,480 @@
+# Default values for librechat.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: ghcr.io/danny-avila/librechat
+  pullPolicy: IfNotPresent
+
+  # Overrides the image tag whose default is the chart appVersion.
+  # tag: "latest"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations: {}
+
+podLabels: {}
+
+podSecurityContext: 
+  fsGroup: 1000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+networkPolicies:
+  enabled: true
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations: {}
+  kubernetes.io/ingress.class: nginx
+  kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: chat.example.com
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+resources: {}
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 1
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+persistence:
+  enabled: false
+  existingClaim: ""
+  accessMode: ReadWriteOnce
+  size: "50Gi"
+  storageClass: "-"
+  selector: ""
+  subPath:
+    images: "" 
+    logs: ""
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+config:
+  file:
+    # Use librechat.yaml config file
+    enabled: true
+    configMapKeyRef:
+      name: librechat-config
+      key: librechat-configmap.yaml
+
+  envSecrets:
+    # Use this when using one k8s secret for multiply env secrets
+    secretRef: librechat
+
+    # Use this when using one k8s secret for each env secret
+    secretKeyRef: []
+#      - name: CREDS_IV
+#        secretName: librechat
+#        secretKey: CREDS_IV
+
+  env:
+    # Full list of possible values
+    # https://github.com/danny-avila/LibreChat/blob/main/.env.example
+    ALLOW_EMAIL_LOGIN: "true"
+    ALLOW_REGISTRATION: "true"
+    ALLOW_SOCIAL_LOGIN: "false"
+    ALLOW_SOCIAL_REGISTRATION: "false"
+    APP_TITLE: "Librechat"
+    CUSTOM_FOOTER: "Provided with ❤️"
+    DEBUG_CONSOLE: "true"
+    DEBUG_LOGGING: "true"
+    DEBUG_OPENAI: "true"
+    DEBUG_PLUGINS: "true"
+    ENDPOINTS: "openAI,azureOpenAI,bingAI,chatGPTBrowser,google,gptPlugins,anthropic"
+    MEILI_HOST: http://librechat-meilisearch:7700
+    MEILI_HTTP_ADDR: librechat-meilisearch:7700
+    MEILI_NO_ANALYTICS: "true"
+    SEARCH: true
+    HOST: localhost
+    PORT: 3080
+    MONGO_URI: mongodb://mongodb:27017/LibreChat
+    DOMAIN_CLIENT: http://localhost:3080
+    DOMAIN_SERVER: http://localhost:3080
+    NO_INDEX: true
+    CONSOLE_JSON: false
+    UID: 1000
+    GID: 1000
+    MEILI_MASTER_KEY: DrhYf7zENyR6AlUCKmnz0eYASOQdl6zxH7s7MKFSfFCt
+    CREDS_KEY: f34be427ebb29de8d88c107a71546019685ed8b241d8f2ed00c3df97ad2566f0
+    CREDS_IV: e2341419ec3dd3d19b13a1a87fafcbfb
+    SD_WEBUI_URL: http://host.docker.internal:7860
+    JWT_SECRET: 16f8c0ef4a5d391b26034086c628469d3f9f497f08163ab9b40137092f2909ef
+    JWT_REFRESH_SECRET: eaa5191f2914e30b9387fd84e254e4ba6fc51b4654968a82012b72d112ac9ef9
+    INFLUXDB_ADMIN_USER: admin
+    INFLUXDB_ADMIN_PASSWORD: SomePassword
+    INFLUXDB_ORG: LibreChat
+    INFLUXDB_BUCKET: LibreChat
+    INFLUXDB_URL: http://influxdb:8086
+    INFLUXDB_TOKEN: iOU06HKF1ohtYShOiIGkLQOgPUn8zQCF9JqCoXNU-NaZ-AYCId_yDDvIomDPxFsaV4ePMZx4cM9kDSjLS0uQRQ==
+    VITE_API_URL: http://localhost:3080
+    RAG_PORT: 8000
+    RAG_API_URL: http://localhost:8000
+
+
+meilisearch:
+  enabled: true
+  image:
+    # -- Meilisearch image name
+    repository: getmeili/meilisearch
+    # -- Meilisearch image tag
+    tag: v1.8.2
+    # -- Meilisearch image pull policy
+    pullPolicy: IfNotPresent
+    # -- Secret to authenticate against the docker registry
+    pullSecret:
+
+  # Environment loaded into the configMap
+  environment:
+    # -- Deactivates analytics
+    MEILI_NO_ANALYTICS: true
+    # -- Sets the environment. Either **production** or **development**
+    MEILI_ENV: production
+    # For production deployment, the environment MEILI_MASTER_KEY is required.
+    # If MEILI_ENV is set to "production" without setting MEILI_MASTER_KEY, this
+    # chart will automatically create a secure MEILI_MASTER_KEY and push it as a
+    # secret. Otherwise the below value of MEILI_MASTER_KEY will be used instead.
+    # MEILI_MASTER_KEY: ""
+  # auth:
+  #   # -- Use an existing Kubernetes secret for the MEILI_MASTER_KEY
+  #   existingMasterKeySecret: "librechat"
+
+  serviceAccount:
+    # You can use a specific pre-created service account instead of
+    # the one created by this chart.
+    # Set create to false to prevent creating a service account and use your own.
+    # -- Should this chart create a service account
+    create: true
+    # -- Custom service account name, if not created by this chart
+    name: ''
+    # -- Additional annotations for created service account
+    annotations: {}
+
+  podAnnotations: {}
+
+  # -- Additional labels to add to the pod(s) only
+  podLabels: {}
+
+  # -- Additional labels to add to all resources
+  customLabels: {}
+
+  # -- Service HTTP port
+  service:
+    # -- Kubernetes Service type
+    type: ClusterIP
+    port: 7700
+    # -- Additional annotations for service
+    annotations: {}
+
+  container:
+    containerPort: 7700
+
+  podSecurityContext:
+    runAsNonRoot: true
+    runAsUser: 1000
+    runAsGroup: 1000
+    fsGroup: 1000
+    fsGroupChangePolicy: OnRootMismatch
+
+  securityContext:
+    capabilities:
+      drop:
+        - ALL
+    allowPrivilegeEscalation: false
+    readOnlyRootFilesystem: true
+
+  ingress:
+    # -- Enable ingress controller resource
+    enabled: true
+    # -- Ingress ingressClassName
+    className: nginx
+    # -- Ingress annotations
+    annotations: {}
+    kubernetes.io/ingress.class: nginx
+    # -- Path within the host
+    path: /
+    # -- List of hostnames
+    hosts:
+      - meilisearch-example.local
+    # -- TLS specification
+    tls: []
+    #  - secretName: chart-example-tls
+    #    hosts:
+    #      - chart-example.local
+
+  persistence:
+    # -- Enable persistence using PVC
+    enabled: true
+    # -- PVC Access Mode
+    accessMode: ReadWriteOnce
+    ## Persistent Volume Storage Class
+    ## If defined, storageClassName: <storageClass>
+    ## If set to "-", storageClassName: "", which disables dynamic provisioning
+    ## If undefined (the default) or set to null, no storageClassName spec is
+    ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+    ##   GKE, AWS & OpenStack)
+    ##
+    # -- PVC Storage Class
+    storageClass: "-"
+
+    ## Data Persistent Volume existing claim name
+    ## Requires persistence.enabled: true
+    ## If defined, PVC must be created manually before volume will be bound
+    # -- Existing PVC
+    existingClaim: ""
+    # -- PVC Storage Request
+    size: 10Gi
+    # -- Additional annotations for PVC
+    annotations: {}
+    volume:
+      name: data
+      mountPath: /meili_data
+
+  # -- Resources allocation (Requests and Limits)
+  resources: {}
+    # We usually recommend not to specify default resources and to leave this as a conscious
+    # choice for the user. This also increases chances charts run on environments with little
+    # resources, such as Minikube. If you do want to specify resources, uncomment the following
+    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+    # limits:
+    #  cpu: 100m
+    #  memory: 128Mi
+    # requests:
+    #  cpu: 100m
+    #  memory: 128Mi
+
+  # -- Additional volumes for pod
+  volumes: []
+
+  # -- Additional volumes to mount on pod
+  volumeMounts: []
+
+  # -- Additional containers for pod
+  containers: []
+
+  # -- Node labels for pod assignment
+  nodeSelector: {}
+
+  # -- Tolerations for pod assignment
+  tolerations: []
+
+  # -- Affinity for pod assignment
+  affinity: {}
+
+  # -- Pod command
+  command: []
+
+  # -- Monitoring with Prometheus Operator
+  serviceMonitor:
+    # -- Enable ServiceMonitor to configure scraping
+    enabled: false
+    # -- Set of labels to transfer from the Kubernetes Service onto the target
+    additionalLabels: {}
+    # -- Set scraping frequency
+    interval: 1m
+    # -- Set scraping timeout
+    scrapeTimeout: 10s
+    # -- Set path to metrics
+    telemetryPath: /metrics
+    # -- Set of labels to transfer from the Kubernetes Service onto the target
+    targetLabels: []
+    # -- MetricRelabelConfigs to apply to samples before ingestion
+    metricRelabelings: []
+    # -- Set relabel_configs as per https://prometheus.io/docs/prometheus/latest/configuration/configuration/#relabel_config
+    relabelings: []
+
+rag:
+  enabled: false
+
+  autoscaling:
+    enabled: false
+  
+  replicaCount: 1
+
+  podAnnotations: {}
+  podLabels: {}
+  
+  resources: {}
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+  labels: {}
+
+  imagePullSecrets: []
+
+  image:
+    repository: ghcr.io/danny-avila/librechat-rag-api-dev
+    pullPolicy: IfNotPresent
+    tag: 12427916d74d61ca02751c6358fbd21014a5757f
+
+  podSecurityContext: {}
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  affinity: {}
+
+  service:
+    type: ClusterIP
+    port: 8000
+
+  volumes:
+    uploads:
+      size: 500Mi
+
+  config:
+    env:
+      # https://github.com/danny-avila/rag_api?tab=readme-ov-file#environment-variables
+      EMBEDDINGS_MODEL: text-embedding-3-small
+      EMBEDDINGS_PROVIDER: openai
+      RAG_AZURE_OPENAI_API_VERSION: 2023-05-15
+      RAG_AZURE_OPENAI_ENDPOINT: 
+      POSTGRES_USER: librechat-rag-db-user
+      POSTGRES_DB: librechat-rag
+      DB_PORT: 5432
+      DB_HOST: my-extern-pgvector-instance.fqdn.invalid
+      HOST: localhost
+      PORT: 3080
+      MONGO_URI: mongodb://mongodb:27017/LibreChat
+      DOMAIN_CLIENT: http://localhost:3080
+      DOMAIN_SERVER: http://localhost:3080
+      NO_INDEX: true
+      CONSOLE_JSON: false
+      DEBUG_LOGGING: true
+      DEBUG_CONSOLE: false
+      UID: 1000
+      GID: 1000
+      SEARCH: true
+      MEILI_NO_ANALYTICS: true
+      MEILI_HOST: http://0.0.0.0:7700
+      MEILI_MASTER_KEY: DrhYf7zENyR6AlUCKmnz0eYASOQdl6zxH7s7MKFSfFCt
+      DEBUG_PLUGINS: true
+      CREDS_KEY: f34be427ebb29de8d88c107a71546019685ed8b241d8f2ed00c3df97ad2566f0
+      CREDS_IV: e2341419ec3dd3d19b13a1a87fafcbfb
+      SD_WEBUI_URL: http://host.docker.internal:7860
+      JWT_SECRET: 16f8c0ef4a5d391b26034086c628469d3f9f497f08163ab9b40137092f2909ef
+      JWT_REFRESH_SECRET: eaa5191f2914e30b9387fd84e254e4ba6fc51b4654968a82012b72d112ac9ef9
+      INFLUXDB_ADMIN_USER: admin
+      INFLUXDB_ADMIN_PASSWORD: SomePassword
+      INFLUXDB_ORG: LibreChat
+      INFLUXDB_BUCKET: LibreChat
+      INFLUXDB_URL: http://influxdb:8086
+      INFLUXDB_TOKEN: iOU06HKF1ohtYShOiIGkLQOgPUn8zQCF9JqCoXNU-NaZ-AYCId_yDDvIomDPxFsaV4ePMZx4cM9kDSjLS0uQRQ==
+      VITE_API_URL: http://localhost:3080
+      RAG_PORT: 8000
+      RAG_API_URL: http://localhost:8000
+
+
+    envSecrets:
+      secretKeyRef:
+        - name: POSTGRES_PASSWORD
+          secretName: librechat
+          secretKey: postgres_pw
+        - name: RAG_AZURE_OPENAI_API_KEY
+          secretName: librechat
+          secretKey: azure_openai_key
+        - name: JWT_SECRET
+          secretName: librechat
+          secretKey: jwt_secret
+
+redis:
+  enabled: true
+  auth:
+    enabled: true
+    password: 'changeme'
+    # name of an existing secret with Redis® credentials (instead of auth.password), must be created ahead of time
+    existingSecret: ""
+    # Password key to be retrieved from existing secret
+    existingSecretPasswordKey: ""
+  service:
+    type: ClusterIP
+    port: 27017
+
+### ref https://github.com/helm/charts/tree/master/stable/mongodb#configuration
+##
+mongodb:
+  ## Enable or disable MongoDB dependency completely.
+  enabled: true
+
+  auth:
+    # rootPassword:
+    usernames:
+      - librechat
+    # passwords:
+    databases:
+      - librechat
+
+  architecture: replicaset
+  replicaCount: 1
+  arbiter:
+    enabled: false
+    pdb:
+      minAvailable: 0
+  pdb:
+    minAvailable: 0
+
+    # key:
+
+  persistence:
+    enabled: true
+    ## mongodb data Persistent Volume Storage Class
+    ## If defined, storageClassName: <storageClass>
+    ## If set to "-", storageClassName: "", which disables dynamic provisioning
+    ## If undefined (the default) or set to null, no storageClassName spec is
+    ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+    ##   GKE, AWS & OpenStack)
+    ##
+    # storageClass: "-"
+    accessMode: ReadWriteOnce
+    size: 8Gi
+
+  volumePermissions: { enabled: true }

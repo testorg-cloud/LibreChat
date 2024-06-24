@@ -1,0 +1,12 @@
+dependencies:
+- name: meilisearch
+  repository: https://meilisearch.github.io/meilisearch-kubernetes
+  version: 0.7.0
+- name: redis
+  repository: oci://registry-1.docker.io/bitnamicharts
+  version: 19.5.2
+- name: mongodb
+  repository: oci://registry-1.docker.io/bitnamicharts
+  version: 15.6.6
+digest: sha256:b21d06088d1c888043e20807f11baaf98eb5d031c0d7d2740c1159bb8ce0ef48
+generated: "2024-06-20T17:07:22.524332+05:30"
